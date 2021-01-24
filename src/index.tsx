@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Modal from './component/Modal';
+import Modal, { ModalService } from './component/Modal';
 import './index.css';
 
 interface Props {
@@ -13,6 +13,7 @@ interface State {
 interface TestState {
   value: number;
   isShowModal: boolean;
+  inputName: string;
 }
 class Square extends React.Component<Props, State>  {
   constructor(props: Props) {
@@ -65,7 +66,8 @@ class Game extends React.Component<Props, TestState> {
     super(props);
     this.state = {
       value: 0,
-      isShowModal: false
+      isShowModal: false,
+      inputName: '',
     }
   }
 
@@ -80,10 +82,43 @@ class Game extends React.Component<Props, TestState> {
       isShowModal: true
     })
   }
+
+  openModalService = () => {
+    const inputNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      this.setState({
+        inputName: event.target.value
+      });
+    }
+    ModalService.open({
+      onOk: () => {
+        console.log(this.state.inputName);
+        console.log('modal submit 👌 by service, and close')
+      },
+      onCancel: () => {
+        this.setState({
+          inputName: ''
+        })
+        console.log('modal cancel ❌ by service, and close')
+      },
+      title: '这是service打开的',
+      children: (<input type="text" value={this.state.inputName} onChange={inputNameChange} />)
+    })
+  }
+
   render() {
     const ModalProps = {
-      onOk: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {},
-      onCancel:(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {},
+      onOk: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        this.setState({
+          isShowModal: false
+        });
+        console.log('modal submit 👌, and close')
+      },
+      onCancel:(event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        this.setState({
+          isShowModal: false
+        });
+        console.log('modal cancel ❌, and close')
+      },
       title: '测试modal',
     }
     const { isShowModal } = this.state;
@@ -108,6 +143,7 @@ class Game extends React.Component<Props, TestState> {
           </div>
         </Modal>}
         <button onClick={this.openModal}>弹出modal框</button>
+        <button onClick={this.openModalService}>点击测试命令ModalService打开弹框</button>
       </>
     );
   }
