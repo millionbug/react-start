@@ -14,6 +14,7 @@ interface TestState {
   value: number;
   isShowModal: boolean;
   inputName: string;
+  inputNameStash: string;
 }
 class Square extends React.Component<Props, State>  {
   constructor(props: Props) {
@@ -68,6 +69,7 @@ class Game extends React.Component<Props, TestState> {
       value: 0,
       isShowModal: false,
       inputName: '',
+      inputNameStash: '',
     }
   }
 
@@ -77,6 +79,12 @@ class Game extends React.Component<Props, TestState> {
     })
   }
 
+  inputNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      inputNameStash: event.target.value
+    });
+  }
+
   openModal = () => {
     this.setState({
       isShowModal: true
@@ -84,24 +92,15 @@ class Game extends React.Component<Props, TestState> {
   }
 
   openModalService = () => {
-    const inputNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      this.setState({
-        inputName: event.target.value
-      });
-    }
     ModalService.open({
       onOk: () => {
-        console.log(this.state.inputName);
         console.log('modal submit 👌 by service, and close')
       },
       onCancel: () => {
-        this.setState({
-          inputName: ''
-        })
         console.log('modal cancel ❌ by service, and close')
       },
       title: '这是service打开的',
-      children: (<input type="text" value={this.state.inputName} onChange={inputNameChange} />)
+      children: '这是service打开的,如果需要children中潜入form我还没有想到怎么写，sad 😭'
     })
   }
 
@@ -109,13 +108,16 @@ class Game extends React.Component<Props, TestState> {
     const ModalProps = {
       onOk: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         this.setState({
-          isShowModal: false
+          isShowModal: false,
+          inputName: this.state.inputNameStash
         });
+        console.log(this.state.inputName);
         console.log('modal submit 👌, and close')
       },
       onCancel:(event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         this.setState({
-          isShowModal: false
+          isShowModal: false,
+          inputNameStash: this.state.inputName
         });
         console.log('modal cancel ❌, and close')
       },
@@ -139,16 +141,20 @@ class Game extends React.Component<Props, TestState> {
         </div>
         {isShowModal && <Modal {...ModalProps}>
           <div>
-            {'modal content'}
+            <input type="text" value={this.state.inputNameStash} onChange={this.inputNameChange} />
           </div>
         </Modal>}
-        <button onClick={this.openModal}>弹出modal框</button>
+        <button onClick={this.openModal}>弹出modal框inputName: {this.state.inputName}</button>
         <button onClick={this.openModalService}>点击测试命令ModalService打开弹框</button>
       </>
     );
   }
 }
 
+/**
+ * 结论：react做diff时，发现节点有更改，则直接将节点下掉
+ * 不会对子节点进行diff
+ */
 function TestReactUpdate(props: {
   value?: number;
   children?: any;

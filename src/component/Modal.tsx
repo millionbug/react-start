@@ -6,7 +6,7 @@ interface ModalProps {
     onOk: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     onCancel: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     title: string;
-    children: PropTypes.ReactElementLike;
+    children: PropTypes.ReactElementLike | string;
 }
 
 interface ModalState {
