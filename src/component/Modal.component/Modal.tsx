@@ -3,8 +3,8 @@ import ReactDOM from "react-dom";
 import PropTypes from 'prop-types';
 import './Modal.css'
 interface ModalProps {
-    onOk: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-    onCancel: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onOk?: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onCancel?: (event?: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     title: string;
     children: PropTypes.ReactElementLike | string;
 }
@@ -17,16 +17,22 @@ export class ModalService {
     static open(props: ModalProps) {
         const modalContainer = document.createElement('div');
         document.body.appendChild(modalContainer);
-        function onOk() {
-            props.onOk();
-            ReactDOM.unmountComponentAtNode(modalContainer);
-        }
 
-        function onCancel() {
-            props.onCancel();
-            ReactDOM.unmountComponentAtNode(modalContainer);
-        }
-        ReactDOM.render(<Modal {...props} onOk={onOk} onCancel={onCancel} />, modalContainer);
+        return new Promise<void>((resolve, reject) => {
+            function onOk() {
+                props.onOk && props.onOk();
+                ReactDOM.unmountComponentAtNode(modalContainer);
+                resolve();
+            }
+    
+            function onCancel() {
+                props.onCancel && props.onCancel();
+                ReactDOM.unmountComponentAtNode(modalContainer);
+                reject();
+            }
+            ReactDOM.render(<Modal {...props} onOk={onOk} onCancel={onCancel} />, modalContainer);
+        })
+        
     }
 }
 
@@ -42,11 +48,11 @@ export default class Modal extends React.Component<ModalProps, ModalState> {
 
     onOk = () => {
         // 暂时先让外面来close掉吧
-        this.props.onOk();
+        this.props.onOk && this.props.onOk();
     }
 
     onCancel = () => {
-        this.props.onCancel();
+        this.props.onCancel && this.props.onCancel();
     }
 
     // 组件形式打开的，则只能外面关掉该弹框。如果命令方式打开，则需要内部关掉

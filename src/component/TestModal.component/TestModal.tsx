@@ -43,13 +43,24 @@ export default class TestModal extends React.Component<Props, TestState> {
     openModalService = () => {
         ModalService.open({
             onOk: () => {
-            console.log('modal submit 👌 by service, and close')
+                console.log('modal submit 👌 by service, and close')
             },
             onCancel: () => {
-            console.log('modal cancel ❌ by service, and close')
+                console.log('modal cancel ❌ by service, and close')
             },
             title: '这是service打开的',
             children: '这是service打开的,如果需要children中潜入form我还没有想到怎么写，sad 😭'
+        })
+    }
+
+    openModalServicePromise = async () => {
+        ModalService.open({
+            title: '期待返回promise进行链式调用',
+            children: '这是期待的promise返回的格式，这样更好用感觉'
+        }).then(() => {
+            console.log('modal 点击了确定✅, and close')
+        }).catch(() => {
+            console.log('modal 点击了取消🈲️, and close')
         })
     }
 
@@ -83,6 +94,7 @@ export default class TestModal extends React.Component<Props, TestState> {
           </Modal>}
           <button onClick={this.openModal}>弹出modal框inputName: {this.state.inputName}</button>
           <button onClick={this.openModalService}>点击测试命令ModalService打开弹框</button>
+          <button onClick={this.openModalServicePromise}>点击测试命令ModalService返回promise</button>
         </>
         )
     }

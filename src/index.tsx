@@ -8,7 +8,12 @@ import Main from './component/main'
 
 const history = createBrowserHistory();
 
+const rootDiv = document.createElement('div');
+rootDiv.id = 'root';
+
+document.body.appendChild(rootDiv)
+
 ReactDom.render(
 <Router history={history}>
     <Route path="/" component={Main}></Route>
-</Router>, document.body)
+</Router>, rootDiv);
