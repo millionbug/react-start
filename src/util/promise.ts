@@ -2,8 +2,6 @@ export default class PromiseP<T> {
     data: any;
     status: 'pending' | 'fulfilled' | 'rejected' = 'pending';
 
-    name = '第一'
-
     handlesQue: ((data: any) => any)[] = [];
 
     constructor(producer?: (resolve: Function, reject: Function) => any) {
@@ -13,10 +11,12 @@ export default class PromiseP<T> {
     resolveFn = (data: any) => {
         this.data = data;
         this.status = 'fulfilled';
-        this.handlesQue.forEach(h => {
-            this.excute(h);
-        });
-        this.clearHandlesQue();
+        if (this.handlesQue && this.handlesQue.length) {
+            this.handlesQue.forEach(h => {
+                this.excute(h, this.data);
+            });
+            this.clearHandlesQue();
+        }
         return this;
     }
 
@@ -28,20 +28,24 @@ export default class PromiseP<T> {
 
     then(hanlde: (data: any) => any) {
         if (this.status === 'fulfilled' || this.status === 'rejected') {
-            return this.excute(hanlde);
+            return this.excute(hanlde, this.data);
         }
-        this.handlesQue.push(hanlde);
+
         const p = new PromiseP();
         p.status = 'pending';
-        p.name = '第二';
+        const realHandle = () => {
+            const result = hanlde(this.data);
+            p.resolveFn(result);
+            return p;
+        }
         // 这个 p 的resolve后的回调也需要注入到当前promise的handleque中
-        this.handlesQue.push(p.resolveFn.bind(p));
+        this.handlesQue.push(realHandle);
         return p;
     }
 
-    excute(hanlde: (data: any) => any) {
+    excute(hanlde: (data: any) => any, data: any) {
         try {
-            const result = hanlde(this.data);
+            const result = hanlde(data);
             const p = new PromiseP();
             p.data = result;
             p.status = 'fulfilled';

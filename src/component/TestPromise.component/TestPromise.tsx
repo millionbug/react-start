@@ -6,15 +6,22 @@ export default function TestPromise() {
             resolve('promiseP');
         }, 2000)
     });
-    p.then(async (data) => {
+    p.then((data) => {
         console.log(data)
-        await new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve('2000');
-            }, 2000)
-        })
         return data + '👋';
-    }).then(console.log);
+    }).then(data => {
+        console.log(data)
+        return data + '💐';
+    }).then(data => {
+        console.log(data)
+        return data + '🐶';
+    });
+    p.then((data) => {
+        console.log(data)
+        return data + '123';
+    }).then((data) => {
+        console.log(data)
+    });
     (window as any).p = p;
     return <>测试promise的</>
 }
